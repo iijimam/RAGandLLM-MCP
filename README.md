@@ -1,0 +1,99 @@
+# RAG ＋ 生成 AI であそぼう！の MCP サーバのコード
+
+[RAG + 生成AIであそぼう！](https://intersystems-dc.connpass.com/event/364272/)のウェビナーで使用した MCP サーバー側コードです。
+
+※ REST API 側のコードは https://github.com/Intersystems-jp/RAGandLLM-Asobo にあります。
+
+※ 参考にしたページ：https://qiita.com/Maki-HamarukiLab/items/2f3230d5293beff2ca46
+
+## 含まれるコンポーネント
+
+### ツール
+
+この MCP サーバに含まれるツールは以下の通りです。
+
+- upload_file
+
+  魚の画像ファイルをUploadすると、魚名と釣った場所の情報と釣果が返ります。
+
+  `RAGandLLM-MCP://upload`
+
+  応答JSON例
+  ```
+  {
+    "FishID": "f033",
+    "FishInfo": "2025-08-24 20:00:00　釣り場：木更津沖堤防の状況は、下げ潮、大潮、潮位は-4cm　本日の前後1か月の過去2年間の釣果情報は、最大数:5、最小数:1、最大長cm:27、最小長cm:1",
+    "FishName": "フグ"
+  }
+  ```
+
+- get_recipe
+
+  レシピ生成を依頼できます。
+  
+  upload_file 実行時の応答とユーザの好みの情報や料理経験が入力情報で必要です。
+
+  `RAGandLLM-MCP://recipe`
+
+  POST 要求の Body に指定している実際の JSON は以下の通りです。
+  ```
+  {
+    "FishInfo": "2025-08-24 20:00:00　釣り場：木更津沖堤防の状況は、下げ潮、大潮、潮位は-4cm　本日の前後1か月の過去2年間の釣果情報は、最大数:5、最小数:1、最大長cm:27、最小長cm:1",
+    "FishName": "フグ",
+    "UserInput": `今日釣った魚の体長は30センチで2匹釣りました。魚をさばいたことがありません。初心者でも安全にさばける方法と簡単な料理を教えてください。"
+  }
+  ```  
+
+- register_choka
+
+  釣った魚の釣果を登録できます。
+
+  upload_file で得られた魚名(FishName)と魚ID(FishID)を使用します。
+
+  `RAGandLLM-MCP://choka`
+
+  POST 要求の Body に指定している実際の JSON は以下の通りです。
+
+  ```
+  {
+    "FishID": "f033",
+    "FishName": "フグ",
+    "FishSize": "30",
+    "FishCount": 1
+  }
+  ```
+
+
+## Quickstart
+
+### Install
+
+#### Claude Desktop の開発者用設定
+
+- On MacOS
+
+  `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+
+- On Windows:
+
+  `%APPDATA%/Claude/claude_desktop_config.json`
+
+
+#### 設定内容
+
+Claude desktop の ファイル>設定>開発者 を開き「設定を編集」をクリックし設定用JSONに以下指定します。
+
+```
+"mcpServers": {
+  "RAGandLLM-MCP": {
+    "command": "uv",
+    "args": [
+      "--directory",
+      "C:\\WorkSpace\\MCPTest\\RAGandLLM-MCP",
+      "run",
+      "RAGandLLM-MCP"
+    ]
+  }
+}
+```
+

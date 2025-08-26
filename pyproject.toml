@@ -1,0 +1,17 @@
+[project]
+name = "ragandllm-mcp"
+version = "0.1.0"
+description = "Let's enjoy RAG and LLM!"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [ "mcp>=1.12.0",]
+[[project.authors]]
+name = "mihokoiijima"
+email = "miijima@intersystems.com"
+
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
+
+[project.scripts]
+ragandllm-mcp = "ragandllm_mcp:main"

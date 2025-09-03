@@ -55,15 +55,15 @@ async def register_choka(fish_id: str, fish_name: str, fish_size: str,fish_count
         return data
 
 #OpenAI利用時(/recipe2)／Ollama利用時(/recipe)
-async def get_recipe(user_input: str, fish_name: str, fish_info: str) -> str:
+async def get_recipe(user_input: str, fish_id:str, fish_name: str) -> str:
     headers={
         "Content-Type":"application/json;charset=utf-8"
     }
     # 送信するJSONボディを組み立て
     body = {
         "UserInput": user_input,
-        "FishName": fish_name,
-        "FishInfo": fish_info,
+        "FishID": fish_id,
+        "FishName": fish_name
     }
     async with httpx.AsyncClient(timeout=80.0,verify=False) as client:
         response = await client.post(
@@ -84,13 +84,13 @@ async def handle_list_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="upload_file",
-            description="魚の画像を渡すと魚名や釣り場の釣果や釣ったときの潮位情報が返ります",
+            description="魚の画像を渡すと魚名が返ります。補足情報として魚IDも返ります。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "filename": {
                         "type": "string",
-                        "description": "アップロードする魚画像ファイル名フルパス（例: c:\temp\fish.jpg）で指定します。応答はJSONで返送され、FishID、FishName、FishInfoが返ります"
+                        "description": "アップロードする魚画像ファイル名フルパス（例: c:\temp\fish.jpg）で指定します。応答はJSONで返送され、FishID、FishName、が返ります。"
                     }
                 },
                 "required": ["filename"]
@@ -98,7 +98,7 @@ async def handle_list_tools() -> list[types.Tool]:
         ),
         types.Tool(
             name="get_recipe",
-            description="ユーザプロンプトと前回取得した情報を元にレシピ生成",
+            description="ユーザプロンプトと前回取得した魚名、魚IDを元にレシピ生成",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -106,16 +106,16 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": "ユーザのレシピに対する希望。例：夏バテ防止レシピ"
                     },
+                    "FishID": {
+                        "type": "string",
+                        "description": "魚の画像アップロード後に得られた魚ID"
+                    },
                     "FishName": {
                         "type": "string",
-                        "description": "魚の画像ファイルから得られた魚の名称"
-                    },
-                    "FishInfo": {
-                        "type": "string",
-                        "description": "魚の画像ファイルアップロード後に得られた魚情報"
+                        "description": "魚の画像アップロード後に得られた魚の名称"
                     }
                 },
-                "required": ["UserInput","FishName","FishInfo"]
+                "required": ["UserInput","FishID","FishName"]
             }
         ),
         types.Tool(
@@ -126,11 +126,11 @@ async def handle_list_tools() -> list[types.Tool]:
                 "properties": {
                     "FishID": {
                         "type": "string",
-                        "description": "ツール：uploadの応答JSONにあるFishIDを使用する。ツール:uploadを事前に実行していいない場合はユーザによる指定が必要"
+                        "description": "upload_fileの応答JSONにあるFishIDを使用する。upload_fileを事前に実行していいない場合はユーザによる指定が必要"
                     },
                     "FishName": {
                         "type": "string",
-                        "description": "ツール：uploadの応答JSONにあるFishNameを使用する。ツール:uploadを事前に実行していいない場合はユーザによる指定が必要"
+                        "description": "upload_fileの応答JSONにあるFishNameを使用する。upload_fileを事前に実行していいない場合はユーザによる指定が必要"
                     },
                     "FishSize": {
                         "type": "string",
@@ -198,10 +198,10 @@ async def handle_call_tool(
             raise ValueError("Invalid forecast arguments")
         
         userinput=arguments["UserInput"]
+        fish_id=arguments["FishID"]
         fish_name=arguments["FishName"]
-        fish_info=arguments["FishInfo"]
         try:
-            answer= await get_recipe(userinput,fish_name,fish_info)
+            answer= await get_recipe(userinput,fish_id,fish_name)
             return [
                 types.TextContent(
                     type="text",

@@ -19,8 +19,8 @@
   応答JSON例
   ```
   {
-    "FishID": "f033",
-    "FishName": "フグ"
+    "FishID": "f025",
+    "FishName": "シーバス"
   }
   ```
 
@@ -33,9 +33,9 @@
   POST 要求の Body に指定している実際の JSON は以下の通りです。
   ```
   {
-    "FishID": "f033",
-    "FishName": "フグ",
-    "UserInput": `今日釣った魚の体長は30センチで2匹釣りました。魚をさばいたことがありません。初心者でも安全にさばける方法と簡単な料理を教えてください。"
+    "FishID": "f025",
+    "FishName": "シーバス",
+    "UserInput": "地元料理でフライパン1つで作れるレシピ"
   }
   ```  
 
@@ -49,10 +49,10 @@
 
   ```
   {
-    "FishID": "f033",
-    "FishName": "フグ",
-    "FishSize": "30",
-    "FishCount": 1
+    "FishID": "f025",
+    "FishName": "シーバス",
+    "FishSize": "50",
+    "FishCount": 2
   }
   ```
 
